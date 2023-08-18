@@ -1,5 +1,5 @@
 """
-Simple one-instrument effect loop.
+An effect chain with randomly evolving effect parameters, and feedback
 
 To write to a file:
   python -m midifx.demo --in-path data/scale.mid --out-dir generated --max-out 1000

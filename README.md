@@ -8,7 +8,7 @@ This package implements a modular framework for real-time MIDI effects in Python
 
 ## Installation
 
-> Note: this package requires Python 3.10.
+> Note: this package requires macOS, and Python >= 3.10.
 
 Clone this repository and install using `pip install .` in the cloned directory.
 
