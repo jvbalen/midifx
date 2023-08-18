@@ -101,9 +101,7 @@ class BufferDelay(Module):
         and draw uniformly on "throwback"
     """
 
-    def __init__(
-        self, control_message: ControlChange, gap: float | Parameter = 0.0,
-    ) -> None:
+    def __init__(self, control_message: ControlChange, gap: float | Parameter = 0.0) -> None:
         super().__init__("Buffer delay")
         self.buffer = []
         self.control_message = control_message

@@ -10,7 +10,6 @@ print(EXAMPLE_FILE)
 
 
 def test_read_pitch_shift_write(tmpdir, shift: int = 12):
-
     chain = Chain(
         ReadMIDI(EXAMPLE_FILE),
         PitchShift(amount=shift, on=True),
