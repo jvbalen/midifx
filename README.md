@@ -28,3 +28,5 @@ chain = Chain(
 )
 chain.run()
 ```
+
+For a more elaborate example, see [`demo.py`](demo.py).
