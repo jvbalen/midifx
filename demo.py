@@ -8,10 +8,10 @@ This example script instantiates a MIDI effect chain in which:
 - results are written to a file (or, if preferred, sent to a MIDI out port)
 
 To write to a file:
-  python -m midifx.demo --in-path data/scale.mid --max-out 1000
+  python demo.py --in-path data/scale.mid --max-out 1000
 
 To send over MIDI:
-  python -m midifx.demo --in-path data/scale.mid --send "MidiFX out"
+  python demo.py --in-path data/scale.mid --send "MidiFX out"
 """
 from argparse import ArgumentParser
 
