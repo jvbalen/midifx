@@ -6,6 +6,21 @@ from midifx.core import as_parameter, Module, Parameter, Switch
 from midifx.note import ControlChange, Message, Note
 
 
+class Delay(Module):
+    """Delay effect that applies a fixed time delay to each incoming event. The delay
+    time can be MIDI-controlled by assigning Parameter to the `delay` attribute.
+    """
+
+    def __init__(self, delay: float | Parameter = 2.0, on: bool | Switch = True):
+        super().__init__("Delay", on=on)
+        self.delay = as_parameter(delay)
+
+    def process(self, messages: Iterable[Message]) -> Iterable[Message]:
+        for message in messages:
+            message.start += self.delay.value
+            yield message
+
+
 class Mirror(Module):
     """Mirror a note's pitch around a given center pitch"""
 
@@ -55,7 +70,7 @@ class VelocityShift(Module):
 
 
 class Dropout(Module):
-    """Shift pitches up or down."""
+    """Drop random notes."""
 
     def __init__(self, amount: float | Parameter = 0.5, on: bool | Switch = True):
         super().__init__("Dropout", on=on)
@@ -63,25 +78,8 @@ class Dropout(Module):
 
     def process(self, messages: Iterable[Message]) -> Iterable[Message]:
         for message in messages:
-            # if not isinstance(message, Note):
-            #     yield message
-            if random.random() < self.amount.value:
+            if not isinstance(message, Note) or random.random() > self.amount.value:
                 yield message
-
-
-class Delay(Module):
-    """Delay effect that applies a fixed time delay to each incoming event. The delay
-    time can be MIDI-controlled by assigning Parameter to the `delay` attribute.
-    """
-
-    def __init__(self, delay: float | Parameter = 2.0, on: bool | Switch = True):
-        super().__init__("Delay", on=on)
-        self.delay = as_parameter(delay)
-
-    def process(self, messages: Iterable[Message]) -> Iterable[Message]:
-        for message in messages:
-            message.start += self.delay.value
-            yield message
 
 
 class BufferDelay(Module):
