@@ -17,11 +17,11 @@ Clone this repository and install using `pip install .` in the cloned directory.
 To instantiate a chain of MIDI effects, including optional MIDI input and output, create a `Chain` and add modules to it. E.g.:
 
 ```python
-from midifx.io import Chain, ReadMIDI, SendMIDI
+from midifx.io import Chain, ReceiveMIDI, SendMIDI
 from midifx.effects import Delay, PitchShift
 
 chain = Chain(
-    ReadMIDI(name="MidiFX in"),
+    ReceiveMIDI(name="MidiFX in"),
     Delay(delay=2.0),
     PitchShift(amount=12),
     SendMIDI(name="MidiFX out"),

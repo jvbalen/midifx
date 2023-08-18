@@ -73,6 +73,8 @@ class ReceiveMIDI(Module):
         self.bytes_queue = asyncio.PriorityQueue(maxsize=2 * MAX_QUEUE_SIZE)
         self.parser = NoteParser()
         self.tasks = [self.receive_bytes, self.run]
+        logging.debug(f"Creating MIDIDestination with name {name}")
+        sleep(2.0)  # give the MIDI port a few seconds to start
 
     async def receive_bytes(self) -> None:
         while True:
@@ -125,7 +127,8 @@ class SendMIDI(Module):
         self.resolution = resolution
         self.override_channel = override_channel
         self.tasks = [self.run, self.send_bytes]
-        sleep(4.0)  # give the MIDI port a few seconds to start
+        logging.debug(f"Creating MIDISource with name {name}")
+        sleep(2.0)  # give the MIDI port a few seconds to start
 
     async def run(self) -> None:
         """Poll `input` for message, and convert to MIDI events (bytes)"""
