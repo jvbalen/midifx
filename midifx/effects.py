@@ -7,7 +7,7 @@ from midifx.note import ControlChange, Message, Note
 
 
 class Mirror(Module):
-    """Mirror a note's pitch around a given center pitch with probability `probability`"""
+    """Mirror a note's pitch around a given center pitch"""
 
     def __init__(self, center_pitch: int = 69, on: bool | Switch = True):
         super().__init__("Mirror", on=on)
@@ -87,18 +87,6 @@ class Delay(Module):
 class BufferDelay(Module):
     """Delay effect that accumulates events in a buffer and starts replaying the buffer
     when a control change event with a given control number is encountered
-
-    This variant additionally:
-    - keeps track of all past buffers
-    - randomly truncate current buffer contents with probability `truncate_probability`
-    - randomly replays a past buffer with probability `throwback_probability`
-
-    Past buffers are sampled with a probability proportionally to len(buffer) ** 2.
-    As a result, the length of the delay/buffer effect should vary over time without
-    quickly converging to zero.
-
-    TODO: consider saving some memory by sampling buffers at "save time" with p < 1 ~ length,
-        and draw uniformly on "throwback"
     """
 
     def __init__(self, control_message: ControlChange, gap: float | Parameter = 0.0) -> None:
