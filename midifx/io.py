@@ -263,7 +263,7 @@ def write_midi(path: str, messages: Iterable[Message], program: int = 0) -> None
     try:
         start_time = messages[0].start
     except IndexError:
-        logging.info("No events to be written... Skipping writing MIDI file.")
+        logging.info("No events were logged... Skipping writing MIDI file.")
         return
 
     instruments = defaultdict(lambda: pretty_midi.Instrument(program=program, is_drum=False))
