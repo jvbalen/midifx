@@ -1,16 +1,16 @@
 # MidiFX
 
-Approximately real-time MIDI manipulation for Python, macOS.
+Approximately real-time MIDI manipulation for Python.
 
 [![build](https://github.com/jvbalen/midifx/actions/workflows/build.yml/badge.svg)](https://github.com/jvbalen/midifx/actions/workflows/build.yml)
 
-A light-weight modular framework for prototyping real-time MIDI effects in Python, based on [`asyncio`](https://docs.python.org/3/library/asyncio.html) and [`simplecoremidi`](https://github.com/sixohsix/simplecoremidi).
+A light-weight modular framework for prototyping real-time MIDI effects in Python, based on [`asyncio`](https://docs.python.org/3/library/asyncio.html) and [`python-rtmidi`](https://github.com/SpotlightKid/python-rtmidi).
+
+Note that pure python (and therefore this codebase) is probably not the best choice for time-sensitive operations like MIDI I/O: your mileage may vary.
 
 ## Installation
 
-> Note: this package requires macOS, and Python >= 3.10.
-
-Clone this repository and install using `pip install .` in the cloned directory.
+This package requires Python >= 3.10. Clone the repository and install using `pip install .` in the cloned directory.
 
 ## Usage
 
@@ -28,8 +28,9 @@ chain = Chain(
 )
 chain.run()
 ```
-
 For a more elaborate example, see [`demo.py`](demo.py).
+
+*Warning: this package currently combines 'note on' and 'note off' events into 'note' objects before processing, after the 'note off' event is registered. In some cases, this adds an intrinsic latency stemming from the duration of a note.*
 
 ## Features
 
@@ -37,8 +38,6 @@ Create a real-time MIDI effect chain by chaining together I/O modules and effect
 * I/O modules include reading and writing MIDI from a file, and sending and receiving MIDI over a MIDI port.
 * A few simple MIDI effects, including delay, pitch shift and velocity changes, are also included.
 * New effects should be relatively easy to implement by subclassing `Module` and implementing `process`.
-
-> Note: 'note on' and 'note off' events are combined in into 'note' events before processing, after the 'note off' event is registered. In some cases, this adds an intrinsic latency stemming from the duration of a note.
 
 Modules can be controlled in real-time using `Parameter` objects that listen to control change messages and update their current `value` within a given range. Similarly, `Switch` objects allow for turning effects on and off. See the [built-in effects](midifx/effects.py) for examples.
 
@@ -56,8 +55,7 @@ from midifx.note import Message, Note
 class MyEffect(Module):
     """Custom MIDI effect. Has one parameter and an on/off attribute, which can be
     MIDI-controlled by passing a Parameter and Switch object to the constructor.
-    These will automatically listen to the relevant respective control messages
-    as implemented in Module.
+    These will automatically listen to the relevant control messages.
     """
 
     def __init__(self, parameter: float | Parameter = 2.0, on: bool | Switch = True):

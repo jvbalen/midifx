@@ -11,7 +11,7 @@ setup(
     python_requires=">=3.10",
     install_requires=[
         "pretty-midi>=0.2.9",
-        "simplecoremidi>=0.3",
+        "python-rtmidi>=1.5.5",
     ],
     extras_require={
         "test": ["pytest"],

@@ -9,7 +9,7 @@ from time import time, sleep
 from typing import Iterable, List, Optional, Set
 
 import pretty_midi
-from simplecoremidi import MIDIDestination, MIDISource
+from rtmidi import MidiIn, MidiOut
 
 from midifx.constants import MAX_QUEUE_SIZE, PROGRAMS
 from midifx.core import Module
@@ -69,21 +69,22 @@ class ReceiveMIDI(Module):
     def __init__(self, name: str, resolution: float = 0.001):
         super().__init__("Receive MIDI")
         self.resolution = resolution
-        self.midi_in = MIDIDestination(name)
+        self.midi_in = find_or_create_midi_in(name)
         self.bytes_queue = asyncio.PriorityQueue(maxsize=2 * MAX_QUEUE_SIZE)
         self.parser = NoteParser()
         self.tasks = [self.receive_bytes, self.run]
-        logging.debug(f"Creating MIDIDestination with name {name}")
-        sleep(2.0)  # give the MIDI port a few seconds to start
 
     async def receive_bytes(self) -> None:
         while True:
             t = time()
-            byte_stream = self.midi_in.recv()
-            if byte_stream:
-                messages = self.parser.parse_stream(t, byte_stream)
+            midi_in_data = self.midi_in.get_message()
+            if midi_in_data:
+                event, _ = midi_in_data
+                messages = self.parser.parse_stream(t, event)
+                logging.debug(f"Received event {event} at t = {t}")
                 await self.send(messages)
-            await asyncio.sleep(self.resolution)
+            else:
+                await asyncio.sleep(self.resolution)
 
 
 class ReadMIDI(Module):
@@ -123,12 +124,10 @@ class SendMIDI(Module):
     ):
         super().__init__("Send MIDI")
         self.bytes_queue = PriorityQueue(maxsize=2 * MAX_QUEUE_SIZE)
-        self.midi_out = MIDISource(name)
+        self.midi_out = find_or_create_midi_out(name)
         self.resolution = resolution
         self.override_channel = override_channel
         self.tasks = [self.run, self.send_bytes]
-        logging.debug(f"Creating MIDISource with name {name}")
-        sleep(2.0)  # give the MIDI port a few seconds to start
 
     async def run(self) -> None:
         """Poll `input` for message, and convert to MIDI events (bytes)"""
@@ -152,7 +151,7 @@ class SendMIDI(Module):
             if late > -self.resolution / 2:
                 log_fn = logging.warning if late > max_late else logging.debug
                 log_fn(f"Sending event {event}, {1000 * late:.1f}ms late")
-                self.midi_out.send(event)
+                self.midi_out.send_message(event)
                 if late > max_late:
                     max_late = late
             else:
@@ -290,3 +289,27 @@ def write_midi(path: str, messages: Iterable[Message], program: int = 0) -> None
     except ValueError as e:
         print(f"Error while writing PrettyMidi data to file: {pm}")
         raise e
+
+
+def find_or_create_midi_in(name: str):
+    midi_in = MidiIn()
+    available_ports = midi_in.get_ports()
+    if name in available_ports:
+        logging.debug(f"Connecting to existing Midi In port with name {name}")
+        midi_in.open_port(available_ports.index(name))
+    else:
+        logging.debug(f"Creating Midi In port with name {name}")
+        midi_in.open_virtual_port(name)
+    return midi_in
+
+
+def find_or_create_midi_out(name: str):
+    midi_out = MidiOut()
+    available_ports = midi_out.get_ports()
+    if name in available_ports:
+        logging.debug(f"Connecting to existing Midi Out port with name {name}")
+        midi_out.open_port(available_ports.index(name))
+    else:
+        logging.debug(f"Creating Midi Out port with name {name}")
+        midi_out.open_virtual_port(name)
+    return midi_out
